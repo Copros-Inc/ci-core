@@ -10,45 +10,43 @@
         .ceo-card { background: #1e1b10; border: 2px solid #f59e0b; border-radius: 1.5rem 1.5rem 1.5rem 0; box-shadow: 0 10px 30px rgba(245,158,11,0.2); }
         .dev-card { background: #0c1a25; border: 2px solid #0ea5e9; border-radius: 1.5rem 1.5rem 0 1.5rem; box-shadow: 0 10px 30px rgba(14,165,233,0.2); }
         .mermaid { background: transparent !important; }
-        .img-preview { max-width: 250px; border-radius: 1rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
         .title-gold-small { color: #f59e0b; letter-spacing: 0.2em; font-size: 8px; font-weight: 800; }
+        .img-preview { max-width: 250px; border-radius: 1rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body class="h-screen flex flex-col">
-    <!-- ヘッダー -->
     <header class="h-16 bg-slate-900 border-b border-white/10 flex items-center justify-between px-6 z-20">
         <div class="flex items-center gap-6">
-            <!-- ヘッダーの表題も復刻デザイン -->
             <div class="flex flex-col">
                 <h1 class="text-xl font-black tracking-tighter text-white italic leading-none">COPROS</h1>
                 <p class="title-gold-small uppercase leading-none mt-1">IDEATION CORE</p>
             </div>
             <select id="project-select" onchange="changeProject(this.value)" class="bg-slate-800 text-[11px] font-bold outline-none rounded px-2 py-1 text-slate-300">
-                <option value="default">岩盤対策 A地点</option>
+                <option value="default">岩盤対策 基本プロジェクト</option>
                 <option value="new">+ 新規作成</option>
             </select>
         </div>
         <div class="flex items-center gap-4">
-            <div id="user-display" class="text-[9px] font-bold px-4 py-1.5 rounded-full border border-white/10 bg-white/5 uppercase tracking-widest"></div>
-            <button onclick="setApiKey()" class="text-slate-600 hover:text-yellow-500 transition-all text-lg">⚙️</button>
+            <div id="user-display" class="text-[9px] font-bold px-4 py-1.5 rounded-full border border-white/10 bg-white/5 tracking-widest uppercase"></div>
+            <button onclick="setApiKey()" class="text-slate-600 hover:text-yellow-500 transition-all text-xl">⚙️</button>
         </div>
     </header>
 
     <main class="flex-1 flex flex-col overflow-hidden">
-        <section class="h-1/3 p-4 overflow-auto bg-black border-b border-white/5">
-            <div id="mermaid-render" class="mermaid flex justify-center py-6">graph LR\nStart["プロジェクト始動"]</div>
+        <section class="h-1/3 p-4 overflow-auto bg-black border-b border-white/5 relative flex items-center justify-center">
+            <div id="mermaid-render" class="mermaid">graph LR\nStart["プロジェクト始動"]</div>
         </section>
         <section id="chat-content" class="flex-1 overflow-y-auto p-6 space-y-8 bg-slate-950/50"></section>
         <footer class="p-4 bg-slate-900 border-t border-white/10 space-y-4">
-            <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-                <button onclick="addTemplate('【提案】')" class="whitespace-nowrap bg-slate-800 text-[10px] px-4 py-2 rounded-full border border-white/10">💡 提案</button>
-                <button onclick="document.getElementById('file-input').click()" class="whitespace-nowrap bg-sky-900/40 text-[10px] px-4 py-2 rounded-full border border-sky-500/30 text-sky-300">📸 現場写真</button>
-                <button onclick="startVoice()" id="voice-btn" class="whitespace-nowrap bg-yellow-900/40 text-[10px] px-4 py-2 rounded-full border border-yellow-500/30 text-yellow-300">🎙️ 音声入力</button>
+            <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar text-[10px]">
+                <button onclick="addTemplate('【提案】')" class="whitespace-nowrap bg-slate-800 px-4 py-2 rounded-full border border-white/10">💡 提案</button>
+                <button onclick="document.getElementById('file-input').click()" class="whitespace-nowrap bg-sky-900/40 px-4 py-2 rounded-full border border-sky-500/30 text-sky-300">📸 現場写真</button>
+                <button onclick="startVoice()" id="voice-btn" class="whitespace-nowrap bg-yellow-900/40 px-4 py-2 rounded-full border border-yellow-500/30 text-yellow-300">🎙️ 音声入力</button>
                 <input type="file" id="file-input" accept="image/*" class="hidden" onchange="processImage(this)">
             </div>
             <div class="flex gap-3 max-w-5xl mx-auto">
-                <textarea id="msg-input" rows="1" class="flex-1 bg-slate-800 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-yellow-500" placeholder="メッセージを入力..."></textarea>
-                <button onclick="handleSend()" class="bg-yellow-500 w-12 h-12 rounded-xl flex items-center justify-center text-black shadow-lg">🚀</button>
+                <textarea id="msg-input" rows="1" class="flex-1 bg-slate-800 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-yellow-500 shadow-inner" placeholder="メッセージを入力..."></textarea>
+                <button onclick="handleSend()" class="bg-yellow-500 w-12 h-12 rounded-xl flex items-center justify-center text-black shadow-lg transition-transform active:scale-90">🚀</button>
             </div>
         </footer>
     </main>
@@ -76,7 +74,7 @@
         document.getElementById('user-display').classList.add(user === 'CEO' ? 'text-yellow-500' : 'text-sky-400');
         document.getElementById('project-select').value = currentProjectId;
 
-        mermaid.initialize({ startOnLoad: true, theme: 'dark', flowchart: { curve: 'basis' } });
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', flowchart: { curve: 'basis', useMaxWidth: true } });
 
         let unsubscribe = null;
         let attachedImage = "";
@@ -111,8 +109,8 @@
                     const isCEO = (d.role === 'CEO');
                     const time = d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : "";
                     const bubble = document.createElement('div');
-                    bubble.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full`;
-                    bubble.innerHTML = `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%]"><span class="text-[9px] font-black ${isCEO ? 'text-yellow-500 ml-2' : 'text-sky-400 mr-2'} uppercase mb-1">${d.sender} ${isMe ? '(あなた)' : ''}</span><div class="${isCEO ? 'ceo-card' : 'dev-card'} p-4 shadow-xl text-left">${d.text ? `<p class="text-base font-medium leading-relaxed">${d.text.replace(/\n/g, '<br>')}</p>` : ""}${d.image ? `<img src="${d.image}" class="img-preview" onclick="zoomImage(this.src)">` : ""}<div class="mt-2 text-[10px] opacity-40 flex justify-between gap-6 border-t border-white/10 pt-1"><span>${time}</span><div class="flex gap-2"><span onclick="addLike('${doc.id}')" class="cursor-pointer">👍 ${d.likes || 0}</span>${isMe ? '<span>既読</span>' : ''}</div></div></div></div>`;
+                    bubble.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full animate-fade-in`;
+                    bubble.innerHTML = `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%]"><span class="text-[9px] font-black ${isCEO ? 'text-yellow-500 ml-2' : 'text-sky-400 mr-2'} uppercase mb-1">${d.sender} ${isMe ? '(あなた)' : ''}</span><div class="${isCEO ? 'ceo-card' : 'dev-card'} p-4 shadow-xl text-left">${d.text ? `<p class="text-base font-medium leading-relaxed">${d.text.replace(/\n/g, '<br>')}</p>` : ""}${d.image ? `<img src="${d.image}" class="img-preview" onclick="window.open(this.src)">` : ""}<div class="mt-2 text-[10px] opacity-40 flex justify-between gap-6 border-t border-white/10 pt-1"><span>${time}</span><div class="flex gap-2"><span onclick="addLike('${doc.id}')" class="cursor-pointer">👍 ${d.likes || 0}</span>${isMe ? '<span>既読</span>' : ''}</div></div></div></div>`;
                     container.appendChild(bubble);
                 });
                 container.scrollTop = container.scrollHeight;
@@ -138,10 +136,21 @@
             await updateDoc(ref, { likes: (snap.data().likes || 0) + 1 });
         };
 
+        // --- AI図解更新（さらに強力なエラー回避版） ---
         async function updateAI(logs) {
             const key = localStorage.getItem('GEMINI_API_KEY');
             if(!key) return;
-            const prompt = `以下の会話からMermaidのgraph LRコードのみを出力せよ。記号[ ]内には日本語を使用し、特殊な記号は使わないこと。graph LRから開始せよ。\n会話：${logs.slice(-5).map(l => l.text).join('\n')}`;
+
+            const chatText = logs.slice(-5).map(l => l.text).join('\n');
+            const prompt = `あなたは建設現場の要約職人です。以下の会話から、重要な単語を3〜5個抽出し、それらを矢印で繋いだMermaid形式の graph LR を作成してください。
+            【ルール】
+            - 出力は必ず graph LR から始めること。
+            - 単語は必ず [ ] で囲むこと。
+            - [ ] の中には特殊記号を使わず、日本語とアルファベットのみにすること。
+            - 余計な説明は一切せず、コードのみを出力すること。
+            会話ログ：
+            ${chatText}`;
+
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, { 
                     method: "POST", headers: {"Content-Type":"application/json"}, 
@@ -149,13 +158,26 @@
                 });
                 const data = await res.json();
                 let aiRes = data.candidates[0].content.parts[0].text;
-                let code = aiRes.match(/graph LR[\s\S]*/)?.[0].replace(/```mermaid/g, "").replace(/```/g, "").replace(/`/g, "").trim();
-                code = code.replace(/[?&!@#$^*]/g, ""); 
+                
+                // 1. graph LR から始まる行を探す
+                let code = aiRes.match(/graph LR[\s\S]*/)?.[0] || "";
+                
+                // 2. 不要な装飾記号を除去
+                code = code.replace(/```mermaid/g, "").replace(/```/g, "").trim();
+                
+                // 3. 記号が含まれる行を安全にクリーニング（ここが最重要）
+                code = code.split('\n')
+                           .filter(line => line.includes('-->'))
+                           .map(line => line.replace(/[^\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\w\s\-\-\>\[\]]/g, "")) // 日本語と基本記号以外削除
+                           .join('\n');
+                
                 if(code.startsWith("graph LR")) { 
                     const el = document.getElementById('mermaid-render');
-                    el.removeAttribute('data-processed'); el.innerHTML = code; mermaid.run(); 
+                    el.removeAttribute('data-processed'); 
+                    el.innerHTML = code; 
+                    await mermaid.run(); 
                 }
-            } catch(e) {}
+            } catch(e) { console.error("AI Error:", e); }
         }
 
         window.processImage = (input) => {
@@ -170,7 +192,7 @@
                     canvas.width = w; canvas.height = h;
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                     attachedImage = canvas.toDataURL('image/jpeg', 0.6);
-                    alert("画像を添付しました。");
+                    alert("画像を添付しました。🚀で送信してください。");
                 };
                 img.src = e.target.result;
             };
@@ -182,6 +204,16 @@
             if(k) { localStorage.setItem('GEMINI_API_KEY', k); location.reload(); }
         };
         window.addTemplate = (t) => { document.getElementById('msg-input').value = t + document.getElementById('msg-input').value; };
+        
+        window.startVoice = () => {
+            const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if(!Speech) return alert("非対応ブラウザです");
+            const rec = new Speech(); rec.lang = 'ja-JP';
+            rec.onstart = () => document.getElementById('voice-btn').innerText = "収音中...";
+            rec.onresult = (e) => document.getElementById('msg-input').value += e.results[0][0].transcript;
+            rec.onend = () => document.getElementById('voice-btn').innerText = "🎙️ 音声入力";
+            rec.start();
+        };
     </script>
 </body>
 </html>

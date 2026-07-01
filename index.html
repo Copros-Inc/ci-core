@@ -5,38 +5,39 @@
     <title>CI Core | COPROS Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #020617; font-family: sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        body { background-color: #020617; font-family: 'Inter', sans-serif; }
+        .title-gold { color: #f59e0b; letter-spacing: 0.3em; font-size: 0.75rem; font-weight: 800; }
     </style>
 </head>
 <body class="h-screen flex items-center justify-center relative overflow-hidden text-slate-200">
-    <div class="absolute w-[500px] h-[500px] bg-yellow-500/5 rounded-full blur-[120px] -top-20 -left-20"></div>
-    <div class="max-w-md w-full p-8 z-10">
-        <div class="text-center mb-12 space-y-2">
-            <h1 class="text-5xl font-black tracking-tighter text-white">CI CORE</h1>
-            <p class="text-[10px] text-yellow-500 tracking-[0.5em] font-bold uppercase">Ideation Engine by COPROS</p>
+    <div class="max-w-md w-full p-8 text-center">
+        <!-- お気に入りの表題デザインを復刻 -->
+        <div class="mb-16">
+            <h1 class="text-6xl font-black tracking-tighter text-white italic">COPROS</h1>
+            <p class="title-gold mt-2 uppercase">IDEATION CORE</p>
         </div>
-        <div class="glass p-8 rounded-[2rem] shadow-2xl space-y-6">
-            <p class="text-center text-xs text-slate-400 tracking-widest uppercase">Select Profile</p>
-            <div class="grid grid-cols-1 gap-4">
-                <button onclick="loginAs('宮﨑社長', 'CEO')" class="flex items-center justify-between p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-yellow-500/50 hover:bg-yellow-500/5 transition-all group">
-                    <div class="text-left"><p class="text-[9px] text-yellow-500 font-bold uppercase">President</p><p class="text-lg font-bold">宮﨑社長</p></div>
-                    <span class="text-2xl group-hover:translate-x-1 transition-all text-yellow-500">→</span>
+
+        <div class="bg-slate-900/50 backdrop-blur-xl border border-white/5 p-10 rounded-[2.5rem] shadow-2xl space-y-8">
+            <div class="grid grid-cols-1 gap-5">
+                <button onclick="loginAs('宮﨑社長', 'CEO')" class="flex items-center justify-between p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-yellow-500 transition-all group">
+                    <div class="text-left"><p class="text-[9px] text-yellow-500 font-bold uppercase tracking-widest">Authorized</p><p class="text-xl font-bold">宮﨑社長</p></div>
+                    <span class="text-2xl group-hover:translate-x-1 transition-all">→</span>
                 </button>
-                <button onclick="loginAs('大森弘三', 'DEV')" class="flex items-center justify-between p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-sky-500/50 hover:bg-sky-500/5 transition-all group">
-                    <div class="text-left"><p class="text-[9px] text-sky-400 font-bold uppercase">Developer</p><p class="text-lg font-bold">大森弘三</p></div>
-                    <span class="text-2xl group-hover:translate-x-1 transition-all text-sky-400">→</span>
+                <button onclick="loginAs('大森弘三', 'DEV')" class="flex items-center justify-between p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-sky-400 transition-all group">
+                    <div class="text-left"><p class="text-[9px] text-sky-400 font-bold uppercase tracking-widest">Professional</p><p class="text-xl font-bold">大森弘三</p></div>
+                    <span class="text-2xl group-hover:translate-x-1 transition-all">→</span>
                 </button>
             </div>
         </div>
     </div>
     <script>
         function loginAs(name, role) {
-            const pass = prompt(name + "としてのパスワードを入力してください:");
-            if (pass === "2026") { // パスワードは「2026」に設定
-                window.location.href = `chat.html?user=${role}`;
-            } else if (pass !== null) {
-                alert("認証に失敗しました。");
+            // 長谷部様、ここでパスワードを求めています
+            const pass = prompt(name + " 認証：パスワードを入力してください");
+            if (pass === "2026") { 
+                window.location.href = `chat.html?user=${role}`; 
+            } else if (pass !== null) { 
+                alert("パスワードが違います。"); 
             }
         }
     </script>

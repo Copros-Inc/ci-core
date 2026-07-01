@@ -8,117 +8,52 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #020617; color: #f8fafc; font-family: sans-serif; overflow: hidden; }
-        .ceo-card { background: #1e1b10; border: 2px solid #f59e0b; border-radius: 1.5rem 1.5rem 1.5rem 0; shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.2); }
-        .dev-card { background: #0c1a25; border: 2px solid #0ea5e9; border-radius: 1.5rem 1.5rem 0 1.5rem; shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.2); }
-        .image-preview { max-width: 200px; border-radius: 0.5rem; cursor: pointer; margin-top: 0.5rem; border: 1px solid rgba(255,255,255,0.1); }
-        /* 全画面表示用 */
+        .ceo-card { background: #1e1b10; border: 2px solid #f59e0b; border-radius: 1.5rem 1.5rem 1.5rem 0; box-shadow: 0 10px 15px rgba(245,158,11,0.2); }
+        .dev-card { background: #0c1a25; border: 2px solid #0ea5e9; border-radius: 1.5rem 1.5rem 0 1.5rem; box-shadow: 0 10px 15px rgba(14,165,233,0.2); }
+        .mermaid { background: #070b14; border-radius: 1rem; }
         #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; }
+        .img-preview { max-width: 250px; border-radius: 1rem; cursor: pointer; margin-top: 0.5rem; border: 1px solid rgba(255,255,255,0.1); }
+        #loading-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; align-items: center; justify-content: center; font-size: 12px; }
     </style>
 </head>
 <body class="h-screen flex flex-col">
 
-    <!-- 画像拡大用モーダル -->
-    <div id="modal" onclick="this.style.display='none'">
-        <img id="modal-img" class="max-w-[95%] max-h-[95%] object-contain">
-    </div>
+    <div id="loading-overlay">画像を最適化中...</div>
+    <div id="modal" onclick="this.style.display='none'"><img id="modal-img" class="max-w-[95%] max-h-[95%] object-contain"></div>
 
-    <!-- Header -->
     <header class="h-16 bg-slate-900 border-b border-white/10 flex items-center justify-between px-4 z-20">
-        <div class="flex items-center gap-3">
-            <div class="flex flex-col">
-                <h1 class="text-xs font-black text-yellow-500 tracking-tighter">CI CORE</h1>
-                <select id="project-select" class="bg-transparent text-sm font-bold outline-none">
-                    <option>岩盤対策 A地点</option>
-                    <option>新規プロジェクト作成 +</option>
-                </select>
-            </div>
+        <div class="flex flex-col">
+            <h1 class="text-xs font-black text-yellow-500 tracking-tighter">CI CORE</h1>
+            <span class="text-[10px] text-slate-500 uppercase tracking-widest">CO-PROSPERITY Ideation</span>
         </div>
-        <div id="user-display" class="text-[10px] font-bold px-3 py-1 rounded-full border border-white/20"></div>
+        <div class="flex items-center gap-3">
+            <div id="user-display" class="text-[10px] font-bold px-3 py-1 rounded-full border border-white/20"></div>
+            <button onclick="setApiKey()" class="text-slate-500 hover:text-white transition-colors text-lg">⚙️</button>
+        </div>
     </header>
 
     <main class="flex-1 flex flex-col overflow-hidden">
-        <!-- マインドマップ (LR Flow) -->
         <section class="h-1/3 p-2 overflow-auto bg-black/50 border-b border-white/5">
-            <div class="mermaid flex justify-center py-4" id="mermaid-render">
-                graph LR
-                A["岩盤対策始動"] --> B("超音波掘削")
-                style A fill:#451a03,stroke:#f59e0b,color:#fbbf24
-            </div>
+            <div class="mermaid flex justify-center py-4" id="mermaid-render">graph LR\nA["岩盤対策始動"]</div>
         </section>
 
-        <!-- チャット -->
-        <section id="chat-content" class="flex-1 overflow-y-auto p-4 space-y-6 bg-slate-950">
-            
-            <!-- CEO Message Example -->
-            <div class="flex flex-col items-start space-y-1">
-                <span class="text-xs font-black text-yellow-500 ml-2 uppercase">宮﨑社長</span>
-                <div class="ceo-card p-4 max-w-[90%] shadow-xl">
-                    <p class="text-base font-medium leading-relaxed">大森君、この岩盤。もう少し低周波で叩けないか？</p>
-                    <div class="mt-2 text-[10px] text-yellow-500/50 flex justify-between">
-                        <span>14:00</span>
-                        <span>既読 14:05</span>
-                    </div>
-                </div>
-            </div>
+        <section id="chat-content" class="flex-1 overflow-y-auto p-4 space-y-6 bg-slate-950"></section>
 
-            <!-- DEV Message Example (With Image) -->
-            <div class="flex flex-col items-end space-y-1">
-                <span class="text-xs font-black text-sky-400 mr-2 uppercase">大森弘三</span>
-                <div class="dev-card p-4 max-w-[90%] shadow-xl text-right">
-                    <p class="text-base font-medium leading-relaxed text-left text-sky-100">現場写真です。ビットの摩耗が見られます。</p>
-                    <img src="https://images.unsplash.com/photo-1581094128545-0967756f140a?w=400" class="image-preview ml-auto" onclick="zoomImage(this.src)">
-                    <div class="mt-2 text-[10px] text-sky-400/50">
-                        <span>14:10</span>
-                    </div>
-                </div>
-            </div>
-
-        </section>
-
-        <!-- 入力エリア -->
         <footer class="p-4 bg-slate-900 border-t border-white/10 space-y-3">
             <div class="flex gap-2 overflow-x-auto pb-1">
                 <button onclick="addTemplate('【提案】')" class="whitespace-nowrap bg-slate-800 text-[11px] px-4 py-1 rounded-full border border-white/10">💡 提案</button>
-                <button onclick="addTemplate('【質問】')" class="whitespace-nowrap bg-slate-800 text-[11px] px-4 py-1 rounded-full border border-white/10">❓ 質問</button>
-                <button onclick="triggerCamera()" class="whitespace-nowrap bg-sky-900 text-[11px] px-4 py-1 rounded-full border border-sky-500/30 text-sky-200">📸 現場写真</button>
-                <button onclick="startVoice()" class="whitespace-nowrap bg-yellow-900 text-[11px] px-4 py-1 rounded-full border border-yellow-500/30 text-yellow-200">🎙️ 音声入力</button>
+                <button onclick="document.getElementById('file-input').click()" class="whitespace-nowrap bg-sky-900 text-[11px] px-4 py-1 rounded-full border border-sky-500/30">📸 現場写真</button>
+                <button onclick="startVoice()" id="voice-btn" class="whitespace-nowrap bg-yellow-900 text-[11px] px-4 py-1 rounded-full border border-yellow-500/30">🎙️ 音声入力</button>
+                <input type="file" id="file-input" accept="image/*" class="hidden" onchange="processImage(this)">
             </div>
-            
             <div class="flex items-end gap-2">
-                <textarea id="msg-input" rows="1" class="flex-1 bg-slate-800 border-none rounded-2xl px-4 py-3 text-base focus:ring-2 focus:ring-yellow-500 outline-none" placeholder="メッセージを入力..."></textarea>
-                <button class="bg-yellow-500 w-12 h-12 rounded-2xl flex items-center justify-center text-black font-bold active:scale-90 transition-all">🚀</button>
+                <textarea id="msg-input" rows="1" class="flex-1 bg-slate-800 border-none rounded-2xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-yellow-500" placeholder="メッセージを入力..."></textarea>
+                <button onclick="handleSend()" class="bg-yellow-500 w-12 h-12 rounded-2xl flex items-center justify-center text-black font-bold active:scale-90">🚀</button>
             </div>
         </footer>
     </main>
 
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const user = params.get('user') || 'CEO';
-        document.getElementById('user-display').innerText = user === 'CEO' ? '宮﨑社長' : '大森弘三';
-        document.getElementById('user-display').classList.add(user === 'CEO' ? 'text-yellow-500' : 'text-sky-400');
-
-        function zoomImage(src) {
-            document.getElementById('modal-img').src = src;
-            document.getElementById('modal').style.display = 'flex';
-        }
-
-        function addTemplate(text) {
-            const input = document.getElementById('msg-input');
-            input.value = text + " " + input.value;
-            input.focus();
-        }
-
-        function triggerCamera() {
-            alert("カメラを起動します（Firebase連携時に実装）");
-        }
-
-        function startVoice() {
-            alert("音声入力を開始します（ブラウザのSpeechRecognitionを使用予定）");
-        }
-
-        mermaid.initialize({ startOnLoad: true, theme: 'dark', flowchart: { curve: 'basis' } });
-    </script>
-       <script type="module">
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -135,39 +70,97 @@
         const db = getFirestore(app);
         const messagesCol = collection(db, "messages");
 
-        // 送信処理
+        const params = new URLSearchParams(window.location.search);
+        const user = params.get('user') || 'CEO';
+        document.getElementById('user-display').innerText = user === 'CEO' ? '宮﨑社長' : '大森弘三';
+        document.getElementById('user-display').classList.add(user === 'CEO' ? 'text-yellow-500' : 'text-sky-400');
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', flowchart: { curve: 'basis' } });
+
+        let attachedImage = "";
+
+        // --- 画像圧縮ロジック ---
+        window.processImage = (input) => {
+            const file = input.files[0];
+            if (!file) return;
+            document.getElementById('loading-overlay').style.display = 'flex';
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const max = 800; // 最大幅を800pxに制限（これで容量激減）
+                    if (width > height) { if (width > max) { height *= max / width; width = max; } }
+                    else { if (height > max) { width *= max / height; height = max; } }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    attachedImage = canvas.toDataURL('image/jpeg', 0.6); // 圧縮率60%のJPEGに変換
+                    document.getElementById('loading-overlay').style.display = 'none';
+                    alert("画像を最適化して添付しました。");
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.zoomImage = (src) => { document.getElementById('modal-img').src = src; document.getElementById('modal').style.display = 'flex'; };
+
         window.handleSend = async () => {
             const input = document.getElementById('msg-input');
             const text = input.value.trim();
-            if (!text) return;
-
-            await addDoc(messagesCol, {
-                text: text,
-                sender: user === 'CEO' ? '宮﨑社長' : '大森弘三',
-                role: user,
-                timestamp: serverTimestamp()
-            });
-            input.value = "";
+            if (!text && !attachedImage) return;
+            await addDoc(messagesCol, { text, sender: user === 'CEO' ? '宮﨑社長' : '大森弘三', role: user, timestamp: serverTimestamp(), image: attachedImage });
+            input.value = ""; attachedImage = "";
         };
 
-        // 受信処理
         const q = query(messagesCol, orderBy("timestamp", "asc"));
         onSnapshot(q, (snapshot) => {
-            const chatContent = document.getElementById('chat-content');
-            chatContent.innerHTML = "";
+            const container = document.getElementById('chat-content');
+            container.innerHTML = ""; let logs = [];
             snapshot.forEach((doc) => {
-                const data = doc.data();
-                const isCEO = data.role === 'CEO';
-                const time = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString('ja-JP', {hour: '2-digit', minute:'2-digit'}) : "...";
+                const d = doc.data(); logs.push(d);
+                const isCEO = d.role === 'CEO';
+                const time = d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : "";
                 const bubble = document.createElement('div');
                 bubble.className = `flex flex-col ${isCEO ? 'items-start' : 'items-end'} space-y-1`;
-                bubble.innerHTML = `<span class="text-[10px] font-black ${isCEO ? 'text-yellow-500 ml-2' : 'text-sky-400 mr-2'} uppercase">${data.sender}</span><div class="${isCEO ? 'ceo-card' : 'dev-card'} p-4 max-w-[90%] shadow-xl"><p class="text-base font-medium leading-relaxed ${!isCEO ? 'text-sky-100' : ''}">${data.text}</p><div class="mt-2 text-[10px] ${isCEO ? 'text-yellow-500/50' : 'text-sky-400/50'} flex justify-between gap-4"><span>${time}</span>${isCEO ? '<span>既読</span>' : ''}</div></div>`;
-                chatContent.appendChild(bubble);
+                bubble.innerHTML = `<span class="text-[10px] font-black ${isCEO ? 'text-yellow-500 ml-2' : 'text-sky-400 mr-2'}">${d.sender}</span><div class="${isCEO ? 'ceo-card' : 'dev-card'} p-4 max-w-[90%]">${d.text ? `<p class="text-base font-medium">${d.text}</p>` : ""}${d.image ? `<img src="${d.image}" class="img-preview" onclick="zoomImage(this.src)">` : ""}<div class="mt-2 text-[10px] opacity-40 flex justify-between gap-4"><span>${time}</span>${isCEO ? '<span>既読</span>' : ''}</div></div>`;
+                container.appendChild(bubble);
             });
-            chatContent.scrollTop = chatContent.scrollHeight;
-            mermaid.run(); // マインドマップの再描画
+            container.scrollTop = container.scrollHeight;
+            if(logs.length > 0) updateAI(logs);
         });
+
+        async function updateAI(logs) {
+            const key = localStorage.getItem('GEMINI_API_KEY');
+            if(!key) return;
+            const prompt = `以下の会話から岩盤対策プロセスのMermaid.js形式のgraph LRコードのみを出力。日本語、簡潔に。\n会話：${logs.slice(-5).map(l => l.text).join('\n')}`;
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
+                const data = await res.json();
+                const code = data.candidates[0].content.parts[0].text.match(/graph LR[\s\S]*/)?.[0].replace(/```/g, "");
+                if(code) { const el = document.getElementById('mermaid-render'); el.removeAttribute('data-processed'); el.innerHTML = code; mermaid.run(); }
+            } catch(e) {}
+        }
+
+        window.startVoice = () => {
+            const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if(!Speech) return alert("このブラウザは音声入力に対応していません。");
+            const rec = new Speech(); rec.lang = 'ja-JP';
+            rec.onstart = () => { document.getElementById('voice-btn').innerText = "🎙️ 収音中..."; };
+            rec.onresult = (e) => { document.getElementById('msg-input').value += e.results[0][0].transcript; };
+            rec.onend = () => { document.getElementById('voice-btn').innerText = "🎙️ 音声入力"; };
+            rec.start();
+        };
+
+        window.setApiKey = () => {
+            const k = prompt("Gemini APIキーを入力:", localStorage.getItem('GEMINI_API_KEY') || "");
+            if(k) { localStorage.setItem('GEMINI_API_KEY', k); location.reload(); }
+        };
+        window.addTemplate = (t) => { document.getElementById('msg-input').value = t + document.getElementById('msg-input').value; };
     </script>
-  
 </body>
 </html>

@@ -1,61 +1,65 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CI Core | COPROS</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI Core | Ideation Sync</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #020617; color: #f8fafc; font-family: sans-serif; overflow: hidden; }
-        .ceo-card { background: #1e1b10; border: 2px solid #f59e0b; border-radius: 1.5rem 1.5rem 1.5rem 0; shadow: 0 10px 15px rgba(245,158,11,0.2); }
-        .dev-card { background: #0c1a25; border: 2px solid #0ea5e9; border-radius: 1.5rem 1.5rem 0 1.5rem; shadow: 0 10px 15px rgba(14,165,233,0.2); }
-        .mermaid { background: #070b14; border-radius: 1rem; }
-        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; }
-        .img-preview { max-width: 250px; border-radius: 1rem; cursor: pointer; margin-top: 0.5rem; border: 1px solid rgba(255,255,255,0.1); }
+        .ceo-card { background: #1e1b10; border: 2px solid #f59e0b; border-radius: 1.5rem 1.5rem 1.5rem 0; box-shadow: 0 10px 30px rgba(245,158,11,0.2); }
+        .dev-card { background: #0c1a25; border: 2px solid #0ea5e9; border-radius: 1.5rem 1.5rem 0 1.5rem; box-shadow: 0 10px 30px rgba(14,165,233,0.2); }
+        .mermaid { background: transparent !important; }
+        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; align-items: center; justify-content: center; }
+        .img-preview { max-width: 250px; border-radius: 1rem; cursor: pointer; margin-top: 0.8rem; border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body class="h-screen flex flex-col">
-
     <div id="modal" onclick="this.style.display='none'"><img id="modal-img" class="max-w-[95%] max-h-[95%] object-contain"></div>
 
-    <header class="h-16 bg-slate-900 border-b border-white/10 flex items-center justify-between px-4 z-20">
+    <!-- Header -->
+    <header class="h-16 bg-slate-900/80 backdrop-blur-md border-b border-white/10 flex items-center justify-between px-6 z-20">
         <div class="flex flex-col flex-1">
             <h1 class="text-xs font-black text-yellow-500 tracking-tighter uppercase leading-none">CI Core</h1>
-            <!-- プロジェクト選択 & 新規作成 -->
             <select id="project-select" onchange="changeProject(this.value)" class="bg-transparent text-sm font-bold outline-none border-none text-white p-0">
                 <option value="default" class="bg-slate-900">岩盤対策 基本プロジェクト</option>
                 <option value="new" class="bg-slate-900">+ 新規プロジェクト作成</option>
             </select>
         </div>
-        <div class="flex items-center gap-3">
-            <div id="user-display" class="text-[10px] font-bold px-3 py-1 rounded-full border border-white/20"></div>
-            <button onclick="setApiKey()" class="text-slate-500 hover:text-white transition-colors text-lg">⚙️</button>
+        <div class="flex items-center gap-4">
+            <div id="user-display" class="text-[10px] font-bold px-4 py-1.5 rounded-full border border-white/20 bg-white/5 uppercase tracking-widest"></div>
+            <button onclick="setApiKey()" class="text-slate-500 hover:text-yellow-500 transition-all text-xl">⚙️</button>
         </div>
     </header>
 
     <main class="flex-1 flex flex-col overflow-hidden">
-        <section class="h-1/3 p-2 overflow-auto bg-black/50 border-b border-white/5 text-center">
-            <div class="mermaid py-4" id="mermaid-render">graph LR\nStart["プロジェクト開始"]</div>
+        <!-- AI Map -->
+        <section class="h-2/5 p-4 overflow-auto bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black border-b border-white/5 relative">
+            <div class="absolute top-4 left-6 text-[8px] font-bold text-slate-500 tracking-[0.5em] uppercase z-10">Real-time Ideation Map</div>
+            <div class="mermaid flex justify-center py-6" id="mermaid-render">graph LR\nStart["CI Core 始動"]</div>
         </section>
-        <section id="chat-content" class="flex-1 overflow-y-auto p-4 space-y-6 bg-slate-950"></section>
-        <footer class="p-4 bg-slate-900 border-t border-white/10 space-y-3">
-            <div class="flex gap-2 overflow-x-auto pb-1">
-                <button onclick="addTemplate('【提案】')" class="whitespace-nowrap bg-slate-800 text-[11px] px-4 py-1 rounded-full border border-white/10">💡 提案</button>
-                <button onclick="document.getElementById('file-input').click()" class="whitespace-nowrap bg-sky-900 text-[11px] px-4 py-1 rounded-full border border-sky-500/30">📸 現場写真</button>
-                <button onclick="startVoice()" id="voice-btn" class="whitespace-nowrap bg-yellow-900 text-[11px] px-4 py-1 rounded-full border border-yellow-500/30">🎙️ 音声入力</button>
+
+        <!-- Chat History -->
+        <section id="chat-content" class="flex-1 overflow-y-auto p-6 space-y-8 bg-slate-950/50 scroll-smooth"></section>
+
+        <!-- Footer -->
+        <footer class="p-6 bg-slate-900/90 border-t border-white/10 space-y-4">
+            <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                <button onclick="addTemplate('【提案】')" class="whitespace-nowrap bg-slate-800 text-[11px] px-5 py-2 rounded-full border border-white/10 hover:bg-slate-700">💡 提案</button>
+                <button onclick="document.getElementById('file-input').click()" class="whitespace-nowrap bg-sky-900/30 text-[11px] px-5 py-2 rounded-full border border-sky-500/30 text-sky-400 hover:bg-sky-900/50">📸 現場写真</button>
+                <button onclick="startVoice()" id="voice-btn" class="whitespace-nowrap bg-yellow-900/30 text-[11px] px-5 py-2 rounded-full border border-yellow-500/30 text-yellow-400 hover:bg-yellow-900/50">🎙️ 音声入力</button>
                 <input type="file" id="file-input" accept="image/*" class="hidden" onchange="processImage(this)">
             </div>
-            <div class="flex items-end gap-2">
-                <textarea id="msg-input" rows="1" class="flex-1 bg-slate-800 border-none rounded-2xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-yellow-500" placeholder="メッセージを入力..."></textarea>
-                <button onclick="handleSend()" class="bg-yellow-500 w-12 h-12 rounded-2xl flex items-center justify-center text-black shadow-lg">🚀</button>
+            <div class="flex items-end gap-3 max-w-5xl mx-auto">
+                <textarea id="msg-input" rows="1" class="flex-1 bg-slate-800 border-none rounded-2xl px-5 py-4 text-base outline-none focus:ring-2 focus:ring-yellow-500 shadow-inner" placeholder="メッセージを入力..."></textarea>
+                <button onclick="handleSend()" class="bg-yellow-500 hover:bg-yellow-400 w-14 h-14 rounded-2xl flex items-center justify-center text-black font-bold transition-all active:scale-95 shadow-lg shadow-yellow-500/20 text-2xl">🚀</button>
             </div>
         </footer>
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyADYKNA4q7akuYaCYBvU3g40tYcE-jCHaM",
@@ -68,53 +72,36 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        
         const params = new URLSearchParams(window.location.search);
         const user = params.get('user') || 'CEO';
         let currentProjectId = localStorage.getItem('CURRENT_PROJECT_ID') || 'default';
 
-        // 初期表示設定
         document.getElementById('user-display').innerText = user === 'CEO' ? '宮﨑社長' : '大森弘三';
         document.getElementById('user-display').classList.add(user === 'CEO' ? 'text-yellow-500' : 'text-sky-400');
         document.getElementById('project-select').value = currentProjectId;
 
-        mermaid.initialize({ startOnLoad: true, theme: 'dark', flowchart: { curve: 'basis' } });
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', flowchart: { curve: 'basis', htmlLabels: true } });
 
         let unsubscribe = null;
         let attachedImage = "";
 
-        // プロジェクト切り替え & 新規作成
         window.changeProject = (val) => {
             if (val === 'new') {
                 const name = prompt("新しいプロジェクト名を入力してください:");
                 if (name) {
                     const id = "proj_" + Date.now();
-                    const select = document.getElementById('project-select');
-                    const opt = document.createElement('option');
-                    opt.value = id; opt.innerText = name; opt.className = "bg-slate-900";
-                    select.insertBefore(opt, select.lastElementChild);
-                    val = id;
-                    // プロジェクト一覧を保存（簡易）
                     let list = JSON.parse(localStorage.getItem('PROJECT_LIST') || '[]');
-                    list.push({id, name});
-                    localStorage.setItem('PROJECT_LIST', JSON.stringify(list));
-                } else {
-                    document.getElementById('project-select').value = currentProjectId;
-                    return;
-                }
+                    list.push({id, name}); localStorage.setItem('PROJECT_LIST', JSON.stringify(list));
+                    val = id; location.reload();
+                } else { document.getElementById('project-select').value = currentProjectId; return; }
             }
-            currentProjectId = val;
-            localStorage.setItem('CURRENT_PROJECT_ID', val);
-            loadMessages();
+            currentProjectId = val; localStorage.setItem('CURRENT_PROJECT_ID', val); loadMessages();
         };
 
-        // 保存されたプロジェクト一覧の読み込み
-        const list = JSON.parse(localStorage.getItem('PROJECT_LIST') || '[]');
-        list.forEach(p => {
-            const opt = document.createElement('option');
-            opt.value = p.id; opt.innerText = p.name; opt.className = "bg-slate-900";
-            const select = document.getElementById('project-select');
-            select.insertBefore(opt, select.lastElementChild);
+        // プロジェクトリスト反映
+        JSON.parse(localStorage.getItem('PROJECT_LIST') || '[]').forEach(p => {
+            const opt = document.createElement('option'); opt.value = p.id; opt.innerText = p.name;
+            const select = document.getElementById('project-select'); select.insertBefore(opt, select.lastElementChild);
         });
 
         function loadMessages() {
@@ -125,11 +112,27 @@
                 container.innerHTML = ""; let logs = [];
                 snapshot.forEach((doc) => {
                     const d = doc.data(); logs.push(d);
-                    const isCEO = d.role === 'CEO';
+                    const isMe = (d.role === user);
+                    const isCEO = (d.role === 'CEO');
                     const time = d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : "";
+                    
                     const bubble = document.createElement('div');
-                    bubble.className = `flex flex-col ${isCEO ? 'items-start' : 'items-end'} w-full`;
-                    bubble.innerHTML = `<div class="flex flex-col ${isCEO ? 'items-start' : 'items-end'} max-w-[90%]"><span class="text-[10px] font-black ${isCEO ? 'text-yellow-500 ml-2' : 'text-sky-400 mr-2'} uppercase mb-1">${d.sender}</span><div class="${isCEO ? 'ceo-card' : 'dev-card'} p-4 shadow-xl">${d.text ? `<p class="text-base font-medium leading-relaxed">${d.text}</p>` : ""}${d.image ? `<img src="${d.image}" class="img-preview" onclick="zoomImage(this.src)">` : ""}<div class="mt-2 text-[10px] opacity-40 flex justify-between gap-4"><span>${time}</span>${isCEO ? '<span>既読</span>' : ''}</div></div></div>`;
+                    bubble.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full animate-fade-in`;
+                    bubble.innerHTML = `
+                        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%]">
+                            <span class="text-[9px] font-black ${isCEO ? 'text-yellow-500' : 'text-sky-400'} uppercase mb-1.5 px-2">${d.sender} ${isMe ? '(あなた)' : ''}</span>
+                            <div class="${isCEO ? 'ceo-card' : 'dev-card'} p-5 shadow-2xl relative group">
+                                ${d.text ? `<p class="text-base font-medium leading-relaxed">${d.text.replace(/\n/g, '<br>')}</p>` : ""}
+                                ${d.image ? `<img src="${d.image}" class="img-preview" onclick="zoomImage(this.src)">` : ""}
+                                <div class="mt-3 text-[10px] opacity-40 flex justify-between gap-6 border-t border-white/5 pt-2">
+                                    <span>${time}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="cursor-pointer hover:scale-125 transition-transform" onclick="addLike('${doc.id}')">👍 ${d.likes || 0}</span>
+                                        ${isMe ? '<span>既読</span>' : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
                     container.appendChild(bubble);
                 });
                 container.scrollTop = container.scrollHeight;
@@ -142,54 +145,36 @@
             const input = document.getElementById('msg-input');
             const text = input.value.trim();
             if (!text && !attachedImage) return;
-            await addDoc(collection(db, "projects", currentProjectId, "messages"), { text, sender: user === 'CEO' ? '宮﨑社長' : '大森弘三', role: user, timestamp: serverTimestamp(), image: attachedImage });
+            await addDoc(collection(db, "projects", currentProjectId, "messages"), { 
+                text, sender: user === 'CEO' ? '宮﨑社長' : '大森弘三', 
+                role: user, timestamp: serverTimestamp(), image: attachedImage, likes: 0 
+            });
             input.value = ""; attachedImage = "";
         };
 
-       // --- AI図解更新（エラー修正・最強版） ---
+        window.addLike = async (docId) => {
+            const ref = doc(db, "projects", currentProjectId, "messages", docId);
+            const snapshot = await getDoc(ref);
+            await updateDoc(ref, { likes: (snapshot.data().likes || 0) + 1 });
+        };
+
         async function updateAI(logs) {
             const key = localStorage.getItem('GEMINI_API_KEY');
             if(!key) return;
-
-            // AIに「コード以外喋るな」と厳命するプロンプト
-            const prompt = `あなたはMermaid.jsのエキスパートです。
-            以下の会話から、思考プロセスを可視化する「graph LR」から始まるコードのみを出力してください。
-            解説、挨拶、\`\`\`mermaid という記号などは一切含めないでください。
-            会話：${logs.slice(-5).map(l => l.text).join('\n')}`;
-            
+            const prompt = `あなたは建設技術の図解職人です。以下の会話から岩盤対策の思考プロセスをMermaid.jsのgraph LR形式で出力してください。説明文や装飾文字は一切含まず、graph LRから始めてください。\n会話：${logs.slice(-6).map(l => l.text).join('\n')}`;
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, { 
                     method: "POST", headers: {"Content-Type":"application/json"}, 
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
                 });
                 const data = await res.json();
-                
-                if(!data.candidates) { console.error("APIキーが無効か、制限がかかっています"); return; }
-                
-                let aiResponse = data.candidates[0].content.parts[0].text;
-                
-                // --- 強力なクリーニング ---
-                // 1. graph LR から始まる部分を探して抜き出す
-                let codeMatch = aiResponse.match(/graph LR[\s\S]*/);
-                if (!codeMatch) return;
-                
-                let code = codeMatch[0];
-                // 2. 余計な装飾（``` や文章）を徹底的に排除
-                code = code.replace(/```mermaid/g, "")
-                           .replace(/```/g, "")
-                           .split('\n')
-                           .filter(line => !line.includes('ここから') && !line.includes('作成しました'))
-                           .join('\n')
-                           .trim();
-                
+                let aiText = data.candidates[0].content.parts[0].text;
+                let code = aiText.match(/graph LR[\s\S]*/)?.[0].replace(/```/g, "").replace(/mermaid/g, "").trim();
                 if(code) { 
                     const el = document.getElementById('mermaid-render');
-                    // 前回の図解を一度クリアして再描画
-                    el.removeAttribute('data-processed'); 
-                    el.innerHTML = code; 
-                    mermaid.run(); 
+                    el.removeAttribute('data-processed'); el.innerHTML = code; mermaid.run(); 
                 }
-            } catch(e) { console.error("AI連携エラー:", e); }
+            } catch(e) { console.error("AI Error"); }
         }
 
         window.processImage = (input) => {
@@ -204,21 +189,25 @@
                     canvas.width = w; canvas.height = h;
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                     attachedImage = canvas.toDataURL('image/jpeg', 0.6);
-                    alert("画像を添付しました。");
+                    alert("画像を最適化しました。");
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         };
+
         window.zoomImage = (src) => { document.getElementById('modal-img').src = src; document.getElementById('modal').style.display = 'flex'; };
+        
         window.startVoice = () => {
-            const Speech = window.SpeechRecognition || window.webkitRecognition || window.webkitSpeechRecognition;
+            const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if(!Speech) return alert("非対応ブラウザです");
             const rec = new Speech(); rec.lang = 'ja-JP';
-            rec.onstart = () => document.getElementById('voice-btn').innerText = "🎙️...";
+            rec.onstart = () => document.getElementById('voice-btn').innerText = "収音中...";
             rec.onresult = (e) => document.getElementById('msg-input').value += e.results[0][0].transcript;
             rec.onend = () => document.getElementById('voice-btn').innerText = "🎙️ 音声入力";
             rec.start();
         };
+
         window.setApiKey = () => {
             const k = prompt("Gemini APIキーを入力:", localStorage.getItem('GEMINI_API_KEY') || "");
             if(k) { localStorage.setItem('GEMINI_API_KEY', k); location.reload(); }

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI Core | COPROS</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #020617; color: #f8fafc; font-family: sans-serif; overflow: hidden; }
+        .ceo-card { background: #1e1b10; border: 2px solid #f59e0b; border-radius: 1.5rem 1.5rem 1.5rem 0; shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.2); }
+        .dev-card { background: #0c1a25; border: 2px solid #0ea5e9; border-radius: 1.5rem 1.5rem 0 1.5rem; shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.2); }
+        .image-preview { max-width: 200px; border-radius: 0.5rem; cursor: pointer; margin-top: 0.5rem; border: 1px solid rgba(255,255,255,0.1); }
+        /* 全画面表示用 */
+        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <!-- 画像拡大用モーダル -->
+    <div id="modal" onclick="this.style.display='none'">
+        <img id="modal-img" class="max-w-[95%] max-h-[95%] object-contain">
+    </div>
+
+    <!-- Header -->
+    <header class="h-16 bg-slate-900 border-b border-white/10 flex items-center justify-between px-4 z-20">
+        <div class="flex items-center gap-3">
+            <div class="flex flex-col">
+                <h1 class="text-xs font-black text-yellow-500 tracking-tighter">CI CORE</h1>
+                <select id="project-select" class="bg-transparent text-sm font-bold outline-none">
+                    <option>岩盤対策 A地点</option>
+                    <option>新規プロジェクト作成 +</option>
+                </select>
+            </div>
+        </div>
+        <div id="user-display" class="text-[10px] font-bold px-3 py-1 rounded-full border border-white/20"></div>
+    </header>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <!-- マインドマップ (LR Flow) -->
+        <section class="h-1/3 p-2 overflow-auto bg-black/50 border-b border-white/5">
+            <div class="mermaid flex justify-center py-4" id="mermaid-render">
+                graph LR
+                A["岩盤対策始動"] --> B("超音波掘削")
+                style A fill:#451a03,stroke:#f59e0b,color:#fbbf24
+            </div>
+        </section>
+
+        <!-- チャット -->
+        <section id="chat-content" class="flex-1 overflow-y-auto p-4 space-y-6 bg-slate-950">
+            
+            <!-- CEO Message Example -->
+            <div class="flex flex-col items-start space-y-1">
+                <span class="text-xs font-black text-yellow-500 ml-2 uppercase">宮﨑社長</span>
+                <div class="ceo-card p-4 max-w-[90%] shadow-xl">
+                    <p class="text-base font-medium leading-relaxed">大森君、この岩盤。もう少し低周波で叩けないか？</p>
+                    <div class="mt-2 text-[10px] text-yellow-500/50 flex justify-between">
+                        <span>14:00</span>
+                        <span>既読 14:05</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DEV Message Example (With Image) -->
+            <div class="flex flex-col items-end space-y-1">
+                <span class="text-xs font-black text-sky-400 mr-2 uppercase">大森弘三</span>
+                <div class="dev-card p-4 max-w-[90%] shadow-xl text-right">
+                    <p class="text-base font-medium leading-relaxed text-left text-sky-100">現場写真です。ビットの摩耗が見られます。</p>
+                    <img src="https://images.unsplash.com/photo-1581094128545-0967756f140a?w=400" class="image-preview ml-auto" onclick="zoomImage(this.src)">
+                    <div class="mt-2 text-[10px] text-sky-400/50">
+                        <span>14:10</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- 入力エリア -->
+        <footer class="p-4 bg-slate-900 border-t border-white/10 space-y-3">
+            <div class="flex gap-2 overflow-x-auto pb-1">
+                <button onclick="addTemplate('【提案】')" class="whitespace-nowrap bg-slate-800 text-[11px] px-4 py-1 rounded-full border border-white/10">💡 提案</button>
+                <button onclick="addTemplate('【質問】')" class="whitespace-nowrap bg-slate-800 text-[11px] px-4 py-1 rounded-full border border-white/10">❓ 質問</button>
+                <button onclick="triggerCamera()" class="whitespace-nowrap bg-sky-900 text-[11px] px-4 py-1 rounded-full border border-sky-500/30 text-sky-200">📸 現場写真</button>
+                <button onclick="startVoice()" class="whitespace-nowrap bg-yellow-900 text-[11px] px-4 py-1 rounded-full border border-yellow-500/30 text-yellow-200">🎙️ 音声入力</button>
+            </div>
+            
+            <div class="flex items-end gap-2">
+                <textarea id="msg-input" rows="1" class="flex-1 bg-slate-800 border-none rounded-2xl px-4 py-3 text-base focus:ring-2 focus:ring-yellow-500 outline-none" placeholder="メッセージを入力..."></textarea>
+                <button class="bg-yellow-500 w-12 h-12 rounded-2xl flex items-center justify-center text-black font-bold active:scale-90 transition-all">🚀</button>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const user = params.get('user') || 'CEO';
+        document.getElementById('user-display').innerText = user === 'CEO' ? '宮﨑社長' : '大森弘三';
+        document.getElementById('user-display').classList.add(user === 'CEO' ? 'text-yellow-500' : 'text-sky-400');
+
+        function zoomImage(src) {
+            document.getElementById('modal-img').src = src;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function addTemplate(text) {
+            const input = document.getElementById('msg-input');
+            input.value = text + " " + input.value;
+            input.focus();
+        }
+
+        function triggerCamera() {
+            alert("カメラを起動します（Firebase連携時に実装）");
+        }
+
+        function startVoice() {
+            alert("音声入力を開始します（ブラウザのSpeechRecognitionを使用予定）");
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', flowchart: { curve: 'basis' } });
+    </script>
+       <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyADYKNA4q7akuYaCYBvU3g40tYcE-jCHaM",
+            authDomain: "copros-ci-core.firebaseapp.com",
+            projectId: "copros-ci-core",
+            storageBucket: "copros-ci-core.firebasestorage.app",
+            messagingSenderId: "50555057257",
+            appId: "1:50555057257:web:a7f71700f403bbca599ef8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const messagesCol = collection(db, "messages");
+
+        // 送信処理
+        window.handleSend = async () => {
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            await addDoc(messagesCol, {
+                text: text,
+                sender: user === 'CEO' ? '宮﨑社長' : '大森弘三',
+                role: user,
+                timestamp: serverTimestamp()
+            });
+            input.value = "";
+        };
+
+        // 受信処理
+        const q = query(messagesCol, orderBy("timestamp", "asc"));
+        onSnapshot(q, (snapshot) => {
+            const chatContent = document.getElementById('chat-content');
+            chatContent.innerHTML = "";
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const isCEO = data.role === 'CEO';
+                const time = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString('ja-JP', {hour: '2-digit', minute:'2-digit'}) : "...";
+                const bubble = document.createElement('div');
+                bubble.className = `flex flex-col ${isCEO ? 'items-start' : 'items-end'} space-y-1`;
+                bubble.innerHTML = `<span class="text-[10px] font-black ${isCEO ? 'text-yellow-500 ml-2' : 'text-sky-400 mr-2'} uppercase">${data.sender}</span><div class="${isCEO ? 'ceo-card' : 'dev-card'} p-4 max-w-[90%] shadow-xl"><p class="text-base font-medium leading-relaxed ${!isCEO ? 'text-sky-100' : ''}">${data.text}</p><div class="mt-2 text-[10px] ${isCEO ? 'text-yellow-500/50' : 'text-sky-400/50'} flex justify-between gap-4"><span>${time}</span>${isCEO ? '<span>既読</span>' : ''}</div></div>`;
+                chatContent.appendChild(bubble);
+            });
+            chatContent.scrollTop = chatContent.scrollHeight;
+            mermaid.run(); // マインドマップの再描画
+        });
+    </script>
+  
+</body>
+</html>

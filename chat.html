@@ -146,18 +146,50 @@
             input.value = ""; attachedImage = "";
         };
 
-        // --- 以下、以前と同様のAI, 音声, 画像圧縮ロジック ---
+       // --- AI図解更新（エラー修正・最強版） ---
         async function updateAI(logs) {
             const key = localStorage.getItem('GEMINI_API_KEY');
             if(!key) return;
-            const prompt = `会話からMermaid形式のgraph LRコードのみを出力。 graph LRから開始。\n会話：${logs.slice(-5).map(l => l.text).join('\n')}`;
+
+            // AIに「コード以外喋るな」と厳命するプロンプト
+            const prompt = `あなたはMermaid.jsのエキスパートです。
+            以下の会話から、思考プロセスを可視化する「graph LR」から始まるコードのみを出力してください。
+            解説、挨拶、\`\`\`mermaid という記号などは一切含めないでください。
+            会話：${logs.slice(-5).map(l => l.text).join('\n')}`;
+            
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, { 
+                    method: "POST", headers: {"Content-Type":"application/json"}, 
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
+                });
                 const data = await res.json();
-                let aiText = data.candidates[0].content.parts[0].text;
-                let code = aiText.match(/graph LR[\s\S]*/)?.[0].replace(/```mermaid/g, "").replace(/```/g, "").trim();
-                if(code) { const el = document.getElementById('mermaid-render'); el.removeAttribute('data-processed'); el.innerHTML = code; mermaid.run(); }
-            } catch(e) {}
+                
+                if(!data.candidates) { console.error("APIキーが無効か、制限がかかっています"); return; }
+                
+                let aiResponse = data.candidates[0].content.parts[0].text;
+                
+                // --- 強力なクリーニング ---
+                // 1. graph LR から始まる部分を探して抜き出す
+                let codeMatch = aiResponse.match(/graph LR[\s\S]*/);
+                if (!codeMatch) return;
+                
+                let code = codeMatch[0];
+                // 2. 余計な装飾（``` や文章）を徹底的に排除
+                code = code.replace(/```mermaid/g, "")
+                           .replace(/```/g, "")
+                           .split('\n')
+                           .filter(line => !line.includes('ここから') && !line.includes('作成しました'))
+                           .join('\n')
+                           .trim();
+                
+                if(code) { 
+                    const el = document.getElementById('mermaid-render');
+                    // 前回の図解を一度クリアして再描画
+                    el.removeAttribute('data-processed'); 
+                    el.innerHTML = code; 
+                    mermaid.run(); 
+                }
+            } catch(e) { console.error("AI連携エラー:", e); }
         }
 
         window.processImage = (input) => {
